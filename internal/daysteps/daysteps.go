@@ -23,12 +23,12 @@ func parsePackage(data string) (int, time.Duration, error) {
 
 	steps, err := strconv.Atoi(parts[0])
 	if err != nil || steps <= 0 {
-		return 0, 0, fmt.Errorf("ошибка преобразования шагов: %v", err)
+		return 0, 0, fmt.Errorf("ошибка преобразования шагов: %w", err)
 	}
 
 	duration, err := time.ParseDuration(parts[1])
 	if err != nil {
-		return 0, 0, fmt.Errorf("ошибка преобразования времени: %v", err)
+		return 0, 0, fmt.Errorf("ошибка преобразования шагов: %w", err)
 	}
 
 	return steps, duration, nil
