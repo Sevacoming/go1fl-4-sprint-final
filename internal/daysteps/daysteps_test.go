@@ -1,26 +1,47 @@
 package daysteps
 
 import (
+	"strings"
 	"testing"
 	"time"
+
+	"github.com/Sevacomimg/go11f-4-sprint-final/internal/personaldata"
 )
 
-func TestParsePackage(t *testing.T) {
-	steps, dur, err := parsePackage("1000,30m")
+func TestDayStepsActionInfo_OK(t *testing.T) {
+	ds := &DaySteps{
+		Steps:    1000,
+		Duration: 30 * time.Minute,
+		Personal: personaldata.PersonalData{Name: "Иван", Weight: 70, Height: 175},
+	}
+
+	got, err := ds.ActionInfo()
 	if err != nil {
-		t.Errorf("не ожидали ошибку, получили: %v", err)
+		t.Errorf("ActionInfo вернул ошибку: %v", err)
 	}
-	if steps != 1000 {
-		t.Errorf("ожидали 1000 шагов, получили %d", steps)
+
+	if got == "" {
+		t.Errorf("ActionInfo вернул пустую строку")
 	}
-	if dur != 30*time.Minute {
-		t.Errorf("ожидали 30m, получили %v", dur)
+
+	if !strings.Contains(got, "Иван") {
+		t.Errorf("ожидали имя в результате, получили: %s", got)
 	}
 }
 
-func TestDayActionInfo(t *testing.T) {
-	result := DayActionInfo("1000,30m", 70, 1.75)
-	if result == "" {
-		t.Error("ожидали непустой результат, получили пустую строку")
+func TestDayStepsActionInfo_Error(t *testing.T) {
+	ds := &DaySteps{
+		Steps:    0, // некорректное значение
+		Duration: 30 * time.Minute,
+		Personal: personaldata.PersonalData{Name: "Иван", Weight: 70, Height: 175},
+	}
+
+	_, err := ds.ActionInfo()
+	if err == nil {
+		t.Errorf("ожидали ошибку, но её не было")
+	}
+
+	if err != nil && !strings.Contains(err.Error(), "шагов нет") {
+		t.Errorf("ожидали ошибку 'шагов нет', получили: %v", err)
 	}
 }
