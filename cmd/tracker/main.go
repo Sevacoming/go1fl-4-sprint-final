@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Sevacomimg/go11f-4-sprint-final/internal/actioninfo"
-	"github.com/Sevacomimg/go11f-4-sprint-final/internal/daysteps"
-	"github.com/Sevacomimg/go11f-4-sprint-final/internal/personaldata"
+	"github.com/Sevacoming/go11f-4-sprint-final/internal/actioninfo"
+	"github.com/Sevacoming/go11f-4-sprint-final/internal/daysteps"
+	"github.com/Sevacoming/go11f-4-sprint-final/internal/personaldata"
 )
 
 func main() {
