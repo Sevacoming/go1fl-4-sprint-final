@@ -1,0 +1,211 @@
+diff --git a/cmd/tracker/main.go b/cmd/tracker/main.go
+index f4355b4..37287a6 100644
+--- a/cmd/tracker/main.go
++++ b/cmd/tracker/main.go
+@@ -4,13 +4,16 @@ import (
+ 	"fmt"
+ 	"time"
+ 
+-	"github.com/Sevacoming/go11f-4-sprint-final/internal/actioninfo"
+-	"github.com/Sevacoming/go11f-4-sprint-final/internal/daysteps"
+-	"github.com/Sevacoming/go11f-4-sprint-final/internal/personaldata"
++	"github.com/Sevacoming/go1fl-4-sprint-final/internal/actioninfo"
++	"github.com/Sevacoming/go1fl-4-sprint-final/internal/daysteps"
++	"github.com/Sevacoming/go1fl-4-sprint-final/personaldata"
+ )
+ 
+ func main() {
+-	pd := personaldata.New("Иван", 70, 1.75)
++	pd, err := personaldata.New("Иван", 70, 1.75)
++	if err != nil {
++		panic(err)
++	}
+ 
+ 	ds := &daysteps.DaySteps{
+ 		Duration: 30 * time.Minute,
+diff --git a/go.sum b/go.sum
+index e69de29..c38f9d6 100644
+--- a/go.sum
++++ b/go.sum
+@@ -0,0 +1,5 @@
++github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
++github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
++github.com/stretchr/testify v1.10.0/go.mod h1:r2ic/lqez/lEtzL7wO/rwa5dbSLXVDPFyf8C91i36aY=
++gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
++gopkg.in/yaml.v3 v3.0.1/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
+diff --git a/internal/actioninfo/actioninfo_test.go b/internal/actioninfo/actioninfo_test.go
+index 60e2dac..3c26eb7 100644
+--- a/internal/actioninfo/actioninfo_test.go
++++ b/internal/actioninfo/actioninfo_test.go
+@@ -1,16 +1,17 @@
+-package daysteps
++package actioninfo
+ 
+ import (
+ 	"strings"
+ 	"testing"
+ 	"time"
+ 
+-	"github.com/Sevacoming/go1fl-4-sprint-final/internal/personaldata"
++	"github.com/Sevacoming/go1fl-4-sprint-final/internal/daysteps"
++	"github.com/Sevacoming/go1fl-4-sprint-final/personaldata"
+ )
+ 
+ // Test корректного парсинга формата "steps,duration"
+ func TestDaySteps_Parse_OK(t *testing.T) {
+-	ds := &DaySteps{
++	ds := &daysteps.DaySteps{
+ 		Personal: personaldata.PersonalData{
+ 			Name:   "Test",
+ 			Weight: 70,
+@@ -31,7 +32,7 @@ func TestDaySteps_Parse_OK(t *testing.T) {
+ 
+ // Test некорректного формата
+ func TestDaySteps_Parse_Invalid(t *testing.T) {
+-	ds := &DaySteps{}
++	ds := &daysteps.DaySteps{}
+ 	err := ds.Parse("bad-format")
+ 	if err == nil {
+ 		t.Fatal("ожидали ошибку при парсинге, но её нет")
+@@ -40,7 +41,7 @@ func TestDaySteps_Parse_Invalid(t *testing.T) {
+ 
+ // Test формата "date;steps" (используется в actioninfo)
+ func TestDaySteps_Parse_DateSteps_OK(t *testing.T) {
+-	ds := &DaySteps{}
++	ds := &daysteps.DaySteps{}
+ 	err := ds.Parse("2025-09-13;5000")
+ 	if err != nil {
+ 		t.Fatalf("ожидали успешный парсинг date;steps, получили ошибку: %v", err)
+@@ -52,7 +53,7 @@ func TestDaySteps_Parse_DateSteps_OK(t *testing.T) {
+ 
+ // Test ActionInfo возвращает строку, содержащую количество шагов
+ func TestDaySteps_ActionInfo(t *testing.T) {
+-	ds := &DaySteps{
++	ds := &daysteps.DaySteps{
+ 		Personal: personaldata.PersonalData{
+ 			Name:   "Test",
+ 			Weight: 70,
+diff --git a/internal/daysteps/daysteps.go b/internal/daysteps/daysteps.go
+index 64dfa58..e6e2f7b 100644
+--- a/internal/daysteps/daysteps.go
++++ b/internal/daysteps/daysteps.go
+@@ -6,8 +6,8 @@ import (
+ 	"strings"
+ 	"time"
+ 
+-	"github.com/Sevacomimg/go11f-4-sprint-final/internal/personaldata"
+-	"github.com/Sevacomimg/go11f-4-sprint-final/internal/spentcalories"
++	"github.com/Sevacoming/go1fl-4-sprint-final/internal/spentcalories"
++	"github.com/Sevacoming/go1fl-4-sprint-final/personaldata"
+ )
+ 
+ type DaySteps struct {
+@@ -39,12 +39,13 @@ func (ds *DaySteps) ActionInfo() (string, error) {
+ 	}
+ 
+ 	durationMinutes := ds.Duration.Minutes()
+-	calories := spentcalories.WalkingSpentCalories(
+-		ds.Steps,
+-		ds.Personal.Weight,
+-		durationMinutes,
++	calories, err := spentcalories.WalkingSpentCalories(ds.Steps,
++		ds.Personal.Weight, ds.Personal.Height,
++		ds.Duration,
+ 	)
+-
++	if err != nil {
++		return "", err
++	}
+ 	return fmt.Sprintf(
+ 		"%s прошёл %d шагов за %.0f минут, потратил %.2f ккал",
+ 		ds.Personal.Name,
+diff --git a/internal/daysteps/daysteps_test.go b/internal/daysteps/daysteps_test.go
+index 2bc46c1..b8d6929 100644
+--- a/internal/daysteps/daysteps_test.go
++++ b/internal/daysteps/daysteps_test.go
+@@ -5,7 +5,7 @@ import (
+ 	"testing"
+ 	"time"
+ 
+-	"github.com/Sevacomimg/go11f-4-sprint-final/internal/personaldata"
++	"github.com/Sevacoming/go1fl-4-sprint-final/personaldata"
+ )
+ 
+ func TestDayStepsActionInfo_OK(t *testing.T) {
+diff --git a/internal/trainings/trainings_test.go b/internal/trainings/trainings_test.go
+index acef78d..ce14b23 100644
+--- a/internal/trainings/trainings_test.go
++++ b/internal/trainings/trainings_test.go
+@@ -5,7 +5,7 @@ import (
+ 	"testing"
+ 	"time"
+ 
+-	"github.com/Sevacoming/go1fl-4-sprint-final/internal/personaldata"
++	"github.com/Sevacoming/go1fl-4-sprint-final/personaldata"
+ )
+ 
+ func TestTraining_Parse(t *testing.T) {
+@@ -32,7 +32,7 @@ func TestTraining_ActionInfo_Walking(t *testing.T) {
+ 		Steps:        4000,
+ 		TrainingType: "Ходьба",
+ 		Duration:     time.Hour,
+-		Personal:     personaldata.Personal{Name: "Test", Weight: 70, Height: 175},
++		Personal:     personaldata.PersonalData{Name: "Test", Weight: 70, Height: 175},
+ 	}
+ 
+ 	res, err := tr.ActionInfo()
+@@ -53,7 +53,7 @@ func TestTraining_ActionInfo_Running(t *testing.T) {
+ 		Steps:        6000,
+ 		TrainingType: "Бег",
+ 		Duration:     time.Hour,
+-		Personal:     personaldata.Personal{Name: "Test", Weight: 70, Height: 175},
++		Personal:     personaldata.PersonalData{Name: "Test", Weight: 70, Height: 175},
+ 	}
+ 
+ 	res, err := tr.ActionInfo()
+@@ -71,7 +71,7 @@ func TestTraining_ActionInfo_UnknownType(t *testing.T) {
+ 		Steps:        5000,
+ 		TrainingType: "Йога",
+ 		Duration:     time.Hour,
+-		Personal:     personaldata.Personal{Name: "Test", Weight: 70, Height: 175},
++		Personal:     personaldata.PersonalData{Name: "Test", Weight: 70, Height: 175},
+ 	}
+ 
+ 	_, err := tr.ActionInfo()
+diff --git a/personaldata/personaldata_test.go b/personaldata/personaldata_test.go
+index 9158928..a0c8db8 100644
+--- a/personaldata/personaldata_test.go
++++ b/personaldata/personaldata_test.go
+@@ -1,4 +1,4 @@
+-package actioninfo
++package personaldata
+ 
+ import (
+ 	"bytes"
+@@ -33,7 +33,7 @@ func TestInfo_OK(t *testing.T) {
+ 	log.SetOutput(&buf)
+ 	defer log.SetOutput(nil)
+ 
+-	Info(data, fp)
++	Info(data, fp) //что за функция?
+ 
+ 	got := buf.String()
+ 	if !strings.Contains(got, "шаги: 5000") {
+@@ -49,7 +49,7 @@ func TestInfo_ParseError(t *testing.T) {
+ 	log.SetOutput(&buf)
+ 	defer log.SetOutput(nil)
+ 
+-	Info(data, fp)
++	Info(data, fp) //что за функция?
+ 
+ 	got := buf.String()
+ 	if !strings.Contains(got, "Ошибка парсинга") {
+@@ -65,7 +65,7 @@ func TestInfo_ActionInfoError(t *testing.T) {
+ 	log.SetOutput(&buf)
+ 	defer log.SetOutput(nil)
+ 
+-	Info(data, fp)
++	Info(data, fp) //что за функция?
+ 
+ 	got := buf.String()
+ 	if !strings.Contains(got, "Ошибка ActionInfo") {

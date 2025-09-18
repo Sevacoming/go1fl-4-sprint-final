@@ -1,16 +1,17 @@
-package daysteps
+package actioninfo
 
 import (
 	"strings"
 	"testing"
 	"time"
 
-	"github.com/Sevacoming/go1fl-4-sprint-final/internal/personaldata"
+	"github.com/Sevacoming/go1fl-4-sprint-final/internal/daysteps"
+	"github.com/Sevacoming/go1fl-4-sprint-final/personaldata"
 )
 
 // Test корректного парсинга формата "steps,duration"
 func TestDaySteps_Parse_OK(t *testing.T) {
-	ds := &DaySteps{
+	ds := &daysteps.DaySteps{
 		Personal: personaldata.PersonalData{
 			Name:   "Test",
 			Weight: 70,
@@ -31,7 +32,7 @@ func TestDaySteps_Parse_OK(t *testing.T) {
 
 // Test некорректного формата
 func TestDaySteps_Parse_Invalid(t *testing.T) {
-	ds := &DaySteps{}
+	ds := &daysteps.DaySteps{}
 	err := ds.Parse("bad-format")
 	if err == nil {
 		t.Fatal("ожидали ошибку при парсинге, но её нет")
@@ -40,7 +41,7 @@ func TestDaySteps_Parse_Invalid(t *testing.T) {
 
 // Test формата "date;steps" (используется в actioninfo)
 func TestDaySteps_Parse_DateSteps_OK(t *testing.T) {
-	ds := &DaySteps{}
+	ds := &daysteps.DaySteps{}
 	err := ds.Parse("2025-09-13;5000")
 	if err != nil {
 		t.Fatalf("ожидали успешный парсинг date;steps, получили ошибку: %v", err)
@@ -52,7 +53,7 @@ func TestDaySteps_Parse_DateSteps_OK(t *testing.T) {
 
 // Test ActionInfo возвращает строку, содержащую количество шагов
 func TestDaySteps_ActionInfo(t *testing.T) {
-	ds := &DaySteps{
+	ds := &daysteps.DaySteps{
 		Personal: personaldata.PersonalData{
 			Name:   "Test",
 			Weight: 70,

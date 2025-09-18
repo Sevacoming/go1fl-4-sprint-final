@@ -1,4 +1,4 @@
-package actioninfo
+package personaldata
 
 import (
 	"bytes"
@@ -33,7 +33,7 @@ func TestInfo_OK(t *testing.T) {
 	log.SetOutput(&buf)
 	defer log.SetOutput(nil)
 
-	Info(data, fp)
+	Info(data, fp) //что за функция?
 
 	got := buf.String()
 	if !strings.Contains(got, "шаги: 5000") {
@@ -49,7 +49,7 @@ func TestInfo_ParseError(t *testing.T) {
 	log.SetOutput(&buf)
 	defer log.SetOutput(nil)
 
-	Info(data, fp)
+	Info(data, fp) //что за функция?
 
 	got := buf.String()
 	if !strings.Contains(got, "Ошибка парсинга") {
@@ -65,7 +65,7 @@ func TestInfo_ActionInfoError(t *testing.T) {
 	log.SetOutput(&buf)
 	defer log.SetOutput(nil)
 
-	Info(data, fp)
+	Info(data, fp) //что за функция?
 
 	got := buf.String()
 	if !strings.Contains(got, "Ошибка ActionInfo") {

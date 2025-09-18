@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Sevacoming/go1fl-4-sprint-final/internal/personaldata"
+	"github.com/Sevacoming/go1fl-4-sprint-final/personaldata"
 )
 
 func TestTraining_Parse(t *testing.T) {
@@ -32,7 +32,7 @@ func TestTraining_ActionInfo_Walking(t *testing.T) {
 		Steps:        4000,
 		TrainingType: "Ходьба",
 		Duration:     time.Hour,
-		Personal:     personaldata.Personal{Name: "Test", Weight: 70, Height: 175},
+		Personal:     personaldata.PersonalData{Name: "Test", Weight: 70, Height: 175},
 	}
 
 	res, err := tr.ActionInfo()
@@ -53,7 +53,7 @@ func TestTraining_ActionInfo_Running(t *testing.T) {
 		Steps:        6000,
 		TrainingType: "Бег",
 		Duration:     time.Hour,
-		Personal:     personaldata.Personal{Name: "Test", Weight: 70, Height: 175},
+		Personal:     personaldata.PersonalData{Name: "Test", Weight: 70, Height: 175},
 	}
 
 	res, err := tr.ActionInfo()
@@ -71,7 +71,7 @@ func TestTraining_ActionInfo_UnknownType(t *testing.T) {
 		Steps:        5000,
 		TrainingType: "Йога",
 		Duration:     time.Hour,
-		Personal:     personaldata.Personal{Name: "Test", Weight: 70, Height: 175},
+		Personal:     personaldata.PersonalData{Name: "Test", Weight: 70, Height: 175},
 	}
 
 	_, err := tr.ActionInfo()

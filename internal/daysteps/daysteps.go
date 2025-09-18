@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Sevacomimg/go11f-4-sprint-final/internal/personaldata"
-	"github.com/Sevacomimg/go11f-4-sprint-final/internal/spentcalories"
+	"github.com/Sevacoming/go1fl-4-sprint-final/internal/spentcalories"
+	"github.com/Sevacoming/go1fl-4-sprint-final/personaldata"
 )
 
 type DaySteps struct {
@@ -39,12 +39,13 @@ func (ds *DaySteps) ActionInfo() (string, error) {
 	}
 
 	durationMinutes := ds.Duration.Minutes()
-	calories := spentcalories.WalkingSpentCalories(
-		ds.Steps,
-		ds.Personal.Weight,
-		durationMinutes,
+	calories, err := spentcalories.WalkingSpentCalories(ds.Steps,
+		ds.Personal.Weight, ds.Personal.Height,
+		ds.Duration,
 	)
-
+	if err != nil {
+		return "", err
+	}
 	return fmt.Sprintf(
 		"%s прошёл %d шагов за %.0f минут, потратил %.2f ккал",
 		ds.Personal.Name,

@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Sevacomimg/go11f-4-sprint-final/internal/personaldata"
+	"github.com/Sevacoming/go1fl-4-sprint-final/personaldata"
 )
 
 func TestDayStepsActionInfo_OK(t *testing.T) {

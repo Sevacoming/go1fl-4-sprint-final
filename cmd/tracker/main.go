@@ -4,13 +4,16 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Sevacoming/go11f-4-sprint-final/internal/actioninfo"
-	"github.com/Sevacoming/go11f-4-sprint-final/internal/daysteps"
-	"github.com/Sevacoming/go11f-4-sprint-final/internal/personaldata"
+	"github.com/Sevacoming/go1fl-4-sprint-final/internal/actioninfo"
+	"github.com/Sevacoming/go1fl-4-sprint-final/internal/daysteps"
+	"github.com/Sevacoming/go1fl-4-sprint-final/personaldata"
 )
 
 func main() {
-	pd := personaldata.New("Иван", 70, 1.75)
+	pd, err := personaldata.New("Иван", 70, 1.75)
+	if err != nil {
+		panic(err)
+	}
 
 	ds := &daysteps.DaySteps{
 		Duration: 30 * time.Minute,
