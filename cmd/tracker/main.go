@@ -4,24 +4,53 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Sevacoming/go1fl-4-sprint-final/internal/actioninfo"
-	"github.com/Sevacoming/go1fl-4-sprint-final/internal/daysteps"
-	"github.com/Sevacoming/go1fl-4-sprint-final/personaldata"
+	"github.com/Sevacoming/go1f1-4-sprint-final/internal/daysteps"
+	"github.com/Sevacoming/go1f1-4-sprint-final/internal/personaldata"
+	"github.com/Sevacoming/go1f1-4-sprint-final/internal/trainings"
 )
 
 func main() {
-	pd, err := personaldata.New("Иван", 70, 1.75)
+	// Создаём данные о пользователе
+	pd := personaldata.PersonalData{
+		Name:   "Иван",
+		Weight: 70,
+		Height: 175,
+	}
+
+	// Проверяем DaySteps
+	ds, err := daysteps.New("4000 шагов", pd)
 	if err != nil {
-		panic(err)
+		fmt.Println("Ошибка при создании DaySteps:", err)
+		return
+	}
+	dayInfo, _ := ds.Info()
+	fmt.Println("Инфо по шагам:", dayInfo)
+
+	// Проверяем Training (ходьба)
+	trWalk := trainings.Training{
+		Steps:        4000,
+		TrainingType: "ходьба",
+		Duration:     time.Hour,
+		Personal:     pd,
+	}
+	infoWalk, err := trWalk.ActionInfo()
+	if err != nil {
+		fmt.Println("Ошибка тренировки (ходьба):", err)
+	} else {
+		fmt.Println("Инфо по тренировке (ходьба):", infoWalk)
 	}
 
-	ds := &daysteps.DaySteps{
-		Duration: 30 * time.Minute,
-		Personal: *pd,
+	// Проверяем Training (бег)
+	trRun := trainings.Training{
+		Steps:        5000,
+		TrainingType: "бег",
+		Duration:     time.Hour,
+		Personal:     pd,
 	}
-
-	data := []string{"2025-09-13;1000"}
-
-	fmt.Println("== Пример дневной активности ==")
-	actioninfo.Info(data, ds)
+	infoRun, err := trRun.ActionInfo()
+	if err != nil {
+		fmt.Println("Ошибка тренировки (бег):", err)
+	} else {
+		fmt.Println("Инфо по тренировке (бег):", infoRun)
+	}
 }

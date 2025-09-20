@@ -2,79 +2,50 @@ package trainings
 
 import (
 	"fmt"
-	"strconv"
-	"strings"
 	"time"
 
-	"github.com/Sevacoming/go1fl-4-sprint-final/internal/personaldata"
-	"github.com/Sevacoming/go1fl-4-sprint-final/internal/spentcalories"
-	"github.com/Sevacoming/go1fl-4-sprint-final/internal/spentenergy"
+	"github.com/Sevacomimg/go1f1-4-sprint-final/internal/personaldata"
+	"github.com/Sevacomimg/go1f1-4-sprint-final/internal/spentenergy"
 )
 
 type Training struct {
-	Steps        int
-	TrainingType string
-	Duration     time.Duration
-	personaldata.Personal
+	Steps    int
+	Duration time.Duration
+	Personal personaldata.PersonalData
+	Action   string
 }
 
-func (t *Training) Parse(datastring string) error {
-	parts := strings.Split(datastring, ",")
-	if len(parts) != 3 {
-		return fmt.Errorf("ошибка парсинга: ожидали 3 элемента, получили %d", len(parts))
-	}
-
-	steps, err := strconv.Atoi(parts[0])
-	if err != nil {
-		return fmt.Errorf("не удалось преобразовать шаги: %w", err)
-	}
-	t.Steps = steps
-
-	t.TrainingType = parts[1]
-
-	duration, err := time.ParseDuration(parts[2])
-	if err != nil {
-		return fmt.Errorf("не удалось преобразовать длительность: %w", err)
-	}
-	t.Duration = duration
-
-	return nil
-}
-
+// ActionInfo возвращает информацию о тренировке
 func (t Training) ActionInfo() (string, error) {
-	if t.Steps <= 0 {
-		return "", fmt.Errorf("ошибка: количество шагов должно быть > 0")
-	}
-	if t.Duration <= 0 {
-		return "", fmt.Errorf("ошибка: длительность должна быть > 0")
+	if t.Steps <= 0 || t.Duration <= 0 {
+		return "", fmt.Errorf("некорректные параметры тренировки")
 	}
 
-	distKm := spentenergy.DistanceKm(t.Steps)
-	speed := spentenergy.Speed(distKm, t.Duration)
+	distance := spentenergy.Distance(t.Steps, t.Personal.Height)
+	speed := spentenergy.MeanSpeed(distance, t.Duration)
 
 	var calories float64
 	var err error
 
-	switch strings.ToLower(t.TrainingType) {
-	case "ходьба":
-		calories, err = spentcalories.WalkingSpentCalories(t.Steps, t.Personal.Weight, t.Personal.Height, t.Duration)
-	case "бег":
-		calories, err = spentcalories.RunningSpentCalories(t.Steps, t.Personal.Weight, t.Personal.Height, t.Duration)
+	switch t.Action {
+	case "run":
+		calories, err = spentenergy.RunningSpentCalories(
+			t.Steps, t.Personal.Weight, t.Personal.Height, t.Duration,
+		)
+	case "walk":
+		calories, err = spentenergy.WalkingSpentCalories(
+			t.Steps, t.Personal.Weight, t.Personal.Height, t.Duration,
+		)
 	default:
-		return "", fmt.Errorf("неизвестный тип тренировки: %s", t.TrainingType)
+		return "", fmt.Errorf("неизвестное действие: %s", t.Action)
 	}
+
 	if err != nil {
-		return "", fmt.Errorf("ошибка вычисления калорий: %w", err)
+		return "", err
 	}
 
-	result := fmt.Sprintf(
-		"Тип тренировки: %s\nДлительность: %.2f ч.\nДистанция: %.2f км.\nСкорость: %.2f км/ч\nСожгли калорий: %.2f",
-		t.TrainingType,
-		t.Duration.Hours(),
-		distKm,
-		speed,
-		calories,
-	)
-
-	return result, nil
+	return fmt.Sprintf(
+		"Действие: %s, дистанция: %.2f км, скорость: %.2f км/ч, калории: %.1f",
+		t.Action, distance, speed, calories,
+	), nil
 }

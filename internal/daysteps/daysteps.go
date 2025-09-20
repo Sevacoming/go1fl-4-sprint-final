@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Sevacoming/go1fl-4-sprint-final/internal/spentcalories"
-	"github.com/Sevacoming/go1fl-4-sprint-final/personaldata"
+	"github.com/Sevacoming/go1f1-4-sprint-final/internal/personaldata"
+	"github.com/Sevacoming/go1f1-4-sprint-final/internal/spentenergy"
 )
 
 type DaySteps struct {
@@ -16,41 +16,36 @@ type DaySteps struct {
 	Personal personaldata.PersonalData
 }
 
-func (ds *DaySteps) Parse(input string) error {
-	parts := strings.Split(input, ";")
-	if len(parts) != 2 {
-		return fmt.Errorf("неверный формат входных данных: %s", input)
+func New(input string, pd personaldata.PersonalData) (*DaySteps, error) {
+	parts := strings.Split(input, " ")
+	if len(parts) < 2 {
+		return nil, fmt.Errorf("неверный формат входных данных: %s", input)
 	}
 
-	steps, err := strconv.Atoi(parts[1])
+	steps, err := strconv.Atoi(parts[0])
 	if err != nil {
-		return fmt.Errorf("не удалось преобразовать шаги: %w", err)
+		return nil, err
 	}
 
-	ds.Steps = steps
-	ds.Duration = 30 * time.Minute
+	duration := time.Hour // временно фиксировано
 
-	return nil
+	return &DaySteps{
+		Steps:    steps,
+		Duration: duration,
+		Personal: pd,
+	}, nil
 }
 
-func (ds *DaySteps) ActionInfo() (string, error) {
-	if ds.Steps <= 0 {
-		return "", fmt.Errorf("шагов нет")
-	}
-
-	durationMinutes := ds.Duration.Minutes()
-	calories, err := spentcalories.WalkingSpentCalories(ds.Steps,
-		ds.Personal.Weight, ds.Personal.Height,
-		ds.Duration,
+func (ds DaySteps) Info() (string, error) {
+	kcal, err := spentenergy.WalkingSpentCalories(
+		ds.Steps, ds.Personal.Weight, ds.Personal.Height, ds.Duration,
 	)
 	if err != nil {
 		return "", err
 	}
+
 	return fmt.Sprintf(
-		"%s прошёл %d шагов за %.0f минут, потратил %.2f ккал",
-		ds.Personal.Name,
-		ds.Steps,
-		durationMinutes,
-		calories,
+		"Шагов: %d, длительность %v, потрачено %.2f ккал",
+		ds.Steps, ds.Duration, kcal,
 	), nil
 }
