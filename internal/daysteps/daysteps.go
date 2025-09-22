@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Sevacoming/go1f1-4-sprint-final/internal/personaldata"
-	"github.com/Sevacoming/go1f1-4-sprint-final/internal/spentenergy"
+	"sprint4/internal/personaldata"
+	"sprint4/internal/spentenergy"
 )
 
 type DaySteps struct {

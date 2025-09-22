@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Sevacoming/go1fl-4-sprint-final/personaldata"
+	"github.com/Sevacoming/go1fl-4-sprint-final/internal/personaldata"
 )
 
 func TestTraining_ActionInfo(t *testing.T) {

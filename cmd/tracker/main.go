@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/Sevacoming/go1fl-4-sprint-final/internal/daysteps"
-	"github.com/Sevacoming/go1fl-4-sprint-final/internal/personaldata"
 	"github.com/Sevacoming/go1fl-4-sprint-final/internal/trainings"
+	"github.com/Sevacoming/go1fl-4-sprint-final/personaldata"
 )
 
 func main() {

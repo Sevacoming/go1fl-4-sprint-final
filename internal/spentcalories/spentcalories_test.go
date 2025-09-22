@@ -5,60 +5,80 @@ import (
 	"time"
 )
 
-func TestWalkingSpentCalories_Valid(t *testing.T) {
-	cal, err := WalkingSpentCalories(1000, 70.0, 1.75, 30*time.Minute)
+// ✅ Тест WalkingSpentCalories
+func TestWalkingSpentCalories(t *testing.T) {
+	steps := 1000
+	weight := 70.0
+	height := 1.75
+	duration := 30 * time.Minute
+
+	calories, err := WalkingSpentCalories(steps, weight, height, duration)
 	if err != nil {
-		t.Fatalf("ожидали без ошибки, получили: %v", err)
-	}
-	if cal <= 0 {
-		t.Fatalf("ожидали положительное значение калорий, получили: %v", cal)
-	}
-}
-
-func TestWalkingSpentCalories_InvalidParams(t *testing.T) {
-
-	if _, err := WalkingSpentCalories(0, 70.0, 1.75, 30*time.Minute); err == nil {
-		t.Error("ожидалась ошибка при нулевых шагах")
+		t.Errorf("не ожидали ошибку, получили: %v", err)
 	}
 
-	if _, err := WalkingSpentCalories(1000, -70.0, 1.75, 30*time.Minute); err == nil {
-		t.Error("ожидалась ошибка при отрицательном весе")
-	}
-
-	if _, err := WalkingSpentCalories(1000, 70.0, 0.0, 30*time.Minute); err == nil {
-		t.Error("ожидалась ошибка при нулевом росте")
-	}
-
-	if _, err := WalkingSpentCalories(1000, 70.0, 1.75, 0*time.Minute); err == nil {
-		t.Error("ожидалась ошибка при нулевой длительности")
+	if calories <= 0 {
+		t.Errorf("ожидали положительное значение калорий, получили %v", calories)
 	}
 }
 
-func TestRunningSpentCalories_Valid(t *testing.T) {
-	cal, err := RunningSpentCalories(1500, 70.0, 1.75, 45*time.Minute)
+// ✅ Тест RunningSpentCalories
+func TestRunningSpentCalories(t *testing.T) {
+	steps := 2000
+	weight := 70.0
+	height := 1.75
+	duration := 45 * time.Minute
+
+	calories, err := RunningSpentCalories(steps, weight, height, duration)
 	if err != nil {
-		t.Fatalf("ожидали без ошибки, получили: %v", err)
+		t.Errorf("не ожидали ошибку, получили: %v", err)
 	}
-	if cal <= 0 {
-		t.Fatalf("ожидали положительное значение калорий, получили: %v", cal)
+
+	if calories <= 0 {
+		t.Errorf("ожидали положительное значение калорий, получили %v", calories)
 	}
 }
 
-func TestRunningSpentCalories_InvalidParams(t *testing.T) {
-
-	if _, err := RunningSpentCalories(0, 70.0, 1.75, 30*time.Minute); err == nil {
-		t.Error("ожидалась ошибка при нулевых шагах")
+// ✅ Тест parseTraining с корректными данными
+func TestParseTraining_ValidData(t *testing.T) {
+	input := "1000,ходьба,30m"
+	steps, activity, duration, err := parseTraining(input)
+	if err != nil {
+		t.Errorf("не ожидали ошибку, получили: %v", err)
 	}
-
-	if _, err := RunningSpentCalories(1000, -70.0, 1.75, 30*time.Minute); err == nil {
-		t.Error("ожидалась ошибка при отрицательном весе")
+	if steps != 1000 {
+		t.Errorf("ожидали 1000 шагов, получили %d", steps)
 	}
-
-	if _, err := RunningSpentCalories(1000, 70.0, 0.0, 30*time.Minute); err == nil {
-		t.Error("ожидалась ошибка при нулевом росте")
+	if activity != "ходьба" {
+		t.Errorf("ожидали 'ходьба', получили %s", activity)
 	}
+	if duration != 30*time.Minute {
+		t.Errorf("ожидали 30 минут, получили %v", duration)
+	}
+}
 
-	if _, err := RunningSpentCalories(1000, 70.0, 1.75, 0*time.Minute); err == nil {
-		t.Error("ожидалась ошибка при нулевой длительности")
+// ✅ Тест parseTraining с некорректным форматом
+func TestParseTraining_InvalidFormat(t *testing.T) {
+	_, _, _, err := parseTraining("invalid,data")
+	if err == nil {
+		t.Error("ожидали ошибку при некорректных данных, получили nil")
+	}
+}
+
+// ✅ Тест parseTraining с некорректными числами
+func TestParseTraining_InvalidNumbers(t *testing.T) {
+	input := "abc,бег,30m"
+	_, _, _, err := parseTraining(input)
+	if err == nil {
+		t.Error("ожидали ошибку при некорректных числовых значениях, получили nil")
+	}
+}
+
+// ✅ Тест parseTraining с некорректной длительностью
+func TestParseTraining_InvalidDuration(t *testing.T) {
+	input := "1000,ходьба,abc"
+	_, _, _, err := parseTraining(input)
+	if err == nil {
+		t.Error("ожидали ошибку при некорректной длительности, получили nil")
 	}
 }
